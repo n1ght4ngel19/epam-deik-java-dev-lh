@@ -11,6 +11,8 @@ public interface MovieService {
     void updateMovie(String title, String genre, int lengthInMinutes);
 
     Optional<MovieDto> getMovie(String title);
+
     List<Optional<MovieDto>> listMovies();
+
     void deleteMovie(String title);
 }

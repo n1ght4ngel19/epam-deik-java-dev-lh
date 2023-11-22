@@ -2,6 +2,7 @@ package com.epam.training.ticketservice.commands;
 
 import com.epam.training.ticketservice.models.Movie;
 import com.epam.training.ticketservice.services.MovieService;
+import com.epam.training.ticketservice.services.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
@@ -12,6 +13,7 @@ import java.util.Optional;
 @AllArgsConstructor
 public class MovieCommands {
     private final MovieService movieService;
+    private final UserService userService;
 
     @ShellMethod(key = "mk", value = "Create test dataset")
     public String mk() {
@@ -39,7 +41,9 @@ public class MovieCommands {
             return movieService.listMovies()
                     .stream()
                     .flatMap(Optional::stream)
-                    .map(movieDto -> new Movie(movieDto.title(), movieDto.genre(), movieDto.lengthInMinutes()).prettyPrint())
+                    .map(movieDto ->
+                            new Movie(movieDto.title(), movieDto.genre(), movieDto.lengthInMinutes())
+                                    .prettyPrint())
                     .reduce(String::concat)
                     .orElse("There are no movies at the moment");
         } catch (Exception e) {
@@ -53,6 +57,17 @@ public class MovieCommands {
             return movieService.createMovie(title, genre, lengthInMinutes)
                     .map(movieDto1 -> "Movie created successfully")
                     .orElse("Movie already exists");
+        } catch (Exception e) {
+            return e.getMessage();
+        }
+    }
+
+    @ShellMethod(key = "delete movie", value = "Delete movie")
+    public String createMovie(String title) {
+        try {
+            movieService.deleteMovie(title);
+
+            return "Movie deleted successfully";
         } catch (Exception e) {
             return e.getMessage();
         }

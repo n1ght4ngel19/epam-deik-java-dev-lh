@@ -16,12 +16,28 @@ public class MovieServiceImpl implements MovieService {
     private MovieDto movieDto;
 
     @Override
+    public List<Optional<MovieDto>> listMovies() {
+        return movieRepository
+                .findAll()
+                .stream()
+                .map(movie -> Optional.of(new MovieDto(movie.getTitle(), movie.getGenre(), movie.getLengthInMinutes())))
+                .toList();
+    }
+
+    @Override
     public Optional<MovieDto> createMovie(String title, String genre, int lengthInMinutes) {
         Optional<Movie> movie = Optional.of(new Movie(title, genre, lengthInMinutes));
 
         movieRepository.save(movie.get());
 
         return Optional.of(new MovieDto(title, genre, lengthInMinutes));
+    }
+
+    @Override
+    public Optional<MovieDto> getMovie(String title) {
+        Optional<Movie> movie = movieRepository.findByTitle(title);
+
+        return movie.map(movie1 -> new MovieDto(movie1.getTitle(), movie1.getGenre(), movie1.getLengthInMinutes()));
     }
 
     @Override
@@ -34,22 +50,6 @@ public class MovieServiceImpl implements MovieService {
             movie1.setLengthInMinutes(lengthInMinutes);
             movieRepository.save(movie1);
         });
-    }
-
-    @Override
-    public Optional<MovieDto> getMovie(String title) {
-        Optional<Movie> movie = movieRepository.findByTitle(title);
-
-        return movie.map(movie1 -> new MovieDto(movie1.getTitle(), movie1.getGenre(), movie1.getLengthInMinutes()));
-    }
-
-    @Override
-    public List<Optional<MovieDto>> listMovies() {
-        return movieRepository
-                .findAll()
-                .stream()
-                .map(movie -> Optional.of(new MovieDto(movie.getTitle(), movie.getGenre(), movie.getLengthInMinutes())))
-                .toList();
     }
 
     @Override

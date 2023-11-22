@@ -3,8 +3,11 @@ package com.epam.training.ticketservice.models;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.*;
-import java.text.MessageFormat;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
 @Data
 @NoArgsConstructor
@@ -26,6 +29,6 @@ public class Movie {
     }
 
     public String prettyPrint() {
-        return MessageFormat.format("{0} ({1}, {2} minutes)\n", title, genre, lengthInMinutes);
+        return String.format("%s (%s, %s minutes)", title, genre, lengthInMinutes);
     }
 }
