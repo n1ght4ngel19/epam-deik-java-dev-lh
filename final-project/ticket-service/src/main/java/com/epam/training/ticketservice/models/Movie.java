@@ -29,6 +29,6 @@ public class Movie {
     }
 
     public String prettyPrint() {
-        return String.format("%s (%s, %s minutes)", title, genre, lengthInMinutes);
+        return String.format("%s (%s, %s minutes)\n", title, genre, lengthInMinutes);
     }
 }

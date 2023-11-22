@@ -8,7 +8,7 @@ import java.util.Optional;
 public interface MovieService {
     Optional<MovieDto> createMovie(String title, String genre, int lengthInMinutes);
 
-    void updateMovie(String title, String genre, int lengthInMinutes);
+    Optional<MovieDto> updateMovie(String title, String genre, int lengthInMinutes);
 
     Optional<MovieDto> getMovie(String title);
 

@@ -1,5 +1,6 @@
 package com.epam.training.ticketservice.commands;
 
+import com.epam.training.ticketservice.dtos.UserDto;
 import com.epam.training.ticketservice.models.Movie;
 import com.epam.training.ticketservice.services.MovieService;
 import com.epam.training.ticketservice.services.UserService;
@@ -35,24 +36,14 @@ public class MovieCommands {
         }
     }
 
-    @ShellMethod(key = "list movies", value = "List movies")
-    public String listMovies() {
-        try {
-            return movieService.listMovies()
-                    .stream()
-                    .flatMap(Optional::stream)
-                    .map(movieDto ->
-                            new Movie(movieDto.title(), movieDto.genre(), movieDto.lengthInMinutes())
-                                    .prettyPrint())
-                    .reduce(String::concat)
-                    .orElse("There are no movies at the moment");
-        } catch (Exception e) {
-            return e.getMessage();
-        }
-    }
-
     @ShellMethod(key = "create movie", value = "Create movie")
     public String createMovie(String title, String genre, int lengthInMinutes) {
+        UserDto loggedInUser = userService.describe().orElse(null);
+
+        if (loggedInUser == null || !loggedInUser.role().equals("admin")) {
+            return "You are not signed in as admin";
+        }
+
         try {
             return movieService.createMovie(title, genre, lengthInMinutes)
                     .map(movieDto1 -> "Movie created successfully")
@@ -62,8 +53,31 @@ public class MovieCommands {
         }
     }
 
+    @ShellMethod(key = "update movie", value = "Update movie")
+    public String updateMovie(String title, String genre, int lengthInMinutes) {
+        UserDto loggedInUser = userService.describe().orElse(null);
+
+        if (loggedInUser == null || !loggedInUser.role().equals("admin")) {
+            return "You are not signed in as admin";
+        }
+
+        try {
+            return movieService.updateMovie(title, genre, lengthInMinutes)
+                    .map(movieDto1 -> "Movie updated successfully")
+                    .orElse("Movie doesn't exist");
+        } catch (Exception e) {
+            return e.getMessage();
+        }
+    }
+
     @ShellMethod(key = "delete movie", value = "Delete movie")
-    public String createMovie(String title) {
+    public String deleteMovie(String title) {
+        UserDto loggedInUser = userService.describe().orElse(null);
+
+        if (loggedInUser == null || !loggedInUser.role().equals("admin")) {
+            return "You are not signed in as admin";
+        }
+
         try {
             movieService.deleteMovie(title);
 
@@ -79,6 +93,22 @@ public class MovieCommands {
             return movieService.getMovie(title)
                     .map(movieDto -> new Movie(title, movieDto.genre(), movieDto.lengthInMinutes()).prettyPrint())
                     .orElse("Movie not found");
+        } catch (Exception e) {
+            return e.getMessage();
+        }
+    }
+
+    @ShellMethod(key = "list movies", value = "List movies")
+    public String listMovies() {
+        try {
+            return movieService.listMovies()
+                    .stream()
+                    .flatMap(Optional::stream)
+                    .map(movieDto ->
+                            new Movie(movieDto.title(), movieDto.genre(), movieDto.lengthInMinutes())
+                                    .prettyPrint())
+                    .reduce(String::concat)
+                    .orElse("There are no movies at the moment");
         } catch (Exception e) {
             return e.getMessage();
         }

@@ -34,7 +34,7 @@ teszteket az IntelliJ-n belül futtatjuk.
 
 #### Általános követelmények a forráskóddal és az alkalmazással kapcsolatban
 
-* A forráskód elérhető egy nyilvános repóban
+* [x] A forráskód elérhető egy nyilvános repóban
 * Az `mvn clean verify` a sikeresen lefut a `ticket-service-parent` projekten. Ehhez a következők szükségesek
     * A `@grade2-requirements` tag-gel megjelölt acceptance tesztekben leírt követelményeknek megfelelő alkalmazás.
     * Legalább 40%-os unit teszt branch és line coverage az egész `ticket-service` modulra vonatkoztatva.
@@ -49,10 +49,10 @@ teszteket az IntelliJ-n belül futtatjuk.
 
 #### Az alkalmazás által támogatott parancsok
 
-* Az alkalmazás állapotát egy interaktív parancssor segítségével lehet módosítani.
-* A parancssorból az `exit` parancs segítségével bármikor ki lehet lépni, ekkor a 
+* [x] Az alkalmazás állapotát egy interaktív parancssor segítségével lehet módosítani.
+* [x] A parancssorból az `exit` parancs segítségével bármikor ki lehet lépni, ekkor a 
 program futása leáll.
-* Az egyes parancsokhoz lehetséges több szóból álló paraméter megadása úgy, 
+* [x] Az egyes parancsokhoz lehetséges több szóból álló paraméter megadása úgy, 
 ha az adott paramétert idézőjelek közé írjuk. Például a következő parancs 
 a _Spirited Away_ című film létrehozására használható.
 ```
@@ -63,41 +63,41 @@ create movie "Sprited Away" animation 125
 
 ###### Admin account és bejelentkezés
 
-* Az alkalmazás indításakor létezik egy adminisztrátor account.
-    * A felhasználónév legyen 'admin', a jelszó szintén 'admin'.
-* A következő parancs lehetőséget nyújt az adminisztátornak arra, hogy 
+* [x] Az alkalmazás indításakor létezik egy adminisztrátor account.
+    * [x] A felhasználónév legyen 'admin', a jelszó szintén 'admin'.
+* [x] A következő parancs lehetőséget nyújt az adminisztátornak arra, hogy 
 bejelentkezzen
 ```
 sign in privileged <felhasználónév> <jelszó>
 ```
-* Sikertelen bejelentkezés esetén a parancs kimenete a következő:
+* [x] Sikertelen bejelentkezés esetén a parancs kimenete a következő:
 ```
 Login failed due to incorrect credentials
 ```
-* Sikeres bejelentkezés esetén hozzáférhetővé
+* [x] Sikeres bejelentkezés esetén hozzáférhetővé
 vállnak az adminisztrációs parancsok (lásd később)
 
 ###### Az adminisztrátor ki tud jelentkezni
 
-* A következő parancs segítségével az adminisztrátor ki tud jelentkezni
+* [x] A következő parancs segítségével az adminisztrátor ki tud jelentkezni
 ```
 sign out
 ```
-* A kijelentkezés után ne legyenek hozzáférhetőek az adminisztrációs parancsok,
+* [x] A kijelentkezés után ne legyenek hozzáférhetőek az adminisztrációs parancsok,
 amíg az adminisztrátor felhasználó újra be nem jelentkezik.
 
 ###### Az adminisztrátor account információi lekérdezhetőek
 
-* A következő paranccsal lekérdezhető az éppen bejelentkezett
+* [x] A következő paranccsal lekérdezhető az éppen bejelentkezett
 account típusa és állapota.
 ```
 describe account
 ```
-* Bejelentkezett adminisztrátor esetén a parancs kimenete:
+* [x] Bejelentkezett adminisztrátor esetén a parancs kimenete:
 ```
 Signed in with privileged account '<felhasználónév>'
 ```
-* Amennyiben a felhasználó nincs bejelentkezve, a parancs kimenete:
+* [x] Amennyiben a felhasználó nincs bejelentkezve, a parancs kimenete:
 ```
 You are not signed in
 ```
@@ -106,13 +106,13 @@ You are not signed in
 
 ###### Filmek létrehozása
 
-* A következő paranccsal új film hozható létre.
+* [x] A következő paranccsal új film hozható létre.
 ```
 create movie <film címe> <műfaj> <vetítés hossza percben>
 ``` 
-* A parancs adminisztrációs parancs, így csak bejelentkezett 
+* [x] A parancs adminisztrációs parancs, így csak bejelentkezett 
 adminisztrátor felhasználó számára elérhető.
-* A film címe azonosítja a filmet.
+* [x] A film címe azonosítja a filmet.
 
 Például:
 ```
@@ -121,39 +121,39 @@ create movie Sátántangó drama 450
 
 ###### Filmek módosítása
 
-* A következő paranccsal egy már meglévő filmet módosíthatunk.
+* [x] A következő paranccsal egy már meglévő filmet módosíthatunk.
 ```
 update movie <film címe> <műfaj> <vetítés hossza percben>
 ```
-* A parancs adminisztrációs parancs, így csak bejelentkezett 
+* [x] A parancs adminisztrációs parancs, így csak bejelentkezett 
 adminisztrátor felhasználó számára elérhető.
-* A film címe azonosítja a filmet
+* [x] A film címe azonosítja a filmet
 
 ###### Filmek törlése
 
-* A következő paranccsal egy már meglévő filmet törölhetünk.
+* [x] A következő paranccsal egy már meglévő filmet törölhetünk.
 ```
 delete movie <film címe>
 ```
-* A parancs adminisztrációs parancs, így csak bejelentkezett 
+* [x] A parancs adminisztrációs parancs, így csak bejelentkezett 
 adminisztrátor felhasználó számára elérhető.
 
 ###### Filmek lekérdezése
 
-* A következő paranccsal a meglévő filmeket kérdezhetjük le
+* [x] A következő paranccsal a meglévő filmeket kérdezhetjük le
 ```
 list movies
 ``` 
-* A parancs kimenete a következő, ha még nincs film elmentve:
+* [x] A parancs kimenete a következő, ha még nincs film elmentve:
 ```
 There are no movies at the moment
 ```
-* Ha van film elmentve, akkor a parancs kimenetében szerepelnie kell az összes
+* [x] Ha van film elmentve, akkor a parancs kimenetében szerepelnie kell az összes
 filmnek. Minden sor egy-egy filmet ír le és a következőképpen épül fel.
 ```
 <Film címe> (<műfaj>, <vetítés hossza percben> minutes)
 ```
-* Ez a parancs elérhető bármely bejelentkezett vagy nem bejelentkezett felhasználónak.
+* [x] Ez a parancs elérhető bármely bejelentkezett vagy nem bejelentkezett felhasználónak.
 
 ##### A termekről szóló információ kezelése
 
