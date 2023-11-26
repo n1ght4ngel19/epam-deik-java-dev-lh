@@ -10,9 +10,9 @@ public interface MovieService {
 
     Optional<MovieDto> updateMovie(String title, String genre, int lengthInMinutes);
 
+    void deleteMovie(String title);
+
     Optional<MovieDto> getMovie(String title);
 
     List<Optional<MovieDto>> listMovies();
-
-    void deleteMovie(String title);
 }
