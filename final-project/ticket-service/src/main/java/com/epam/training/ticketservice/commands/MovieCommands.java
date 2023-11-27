@@ -5,8 +5,10 @@ import com.epam.training.ticketservice.models.Movie;
 import com.epam.training.ticketservice.services.MovieService;
 import com.epam.training.ticketservice.services.UserService;
 import lombok.AllArgsConstructor;
+import org.springframework.shell.Availability;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
+import org.springframework.shell.standard.ShellMethodAvailability;
 
 import java.util.Optional;
 
@@ -36,14 +38,9 @@ public class MovieCommands {
         }
     }
 
+    @ShellMethodAvailability("isSignedInAsAdmin")
     @ShellMethod(key = "create movie", value = "Create movie")
     public String createMovie(String title, String genre, int lengthInMinutes) {
-        UserDto loggedInUser = userService.describe().orElse(null);
-
-        if (loggedInUser == null || !loggedInUser.role().equals("admin")) {
-            return "You are not signed in as admin";
-        }
-
         try {
             return movieService.createMovie(title, genre, lengthInMinutes)
                     .map(movieDto1 -> "Movie created successfully")
@@ -53,14 +50,9 @@ public class MovieCommands {
         }
     }
 
+    @ShellMethodAvailability("isSignedInAsAdmin")
     @ShellMethod(key = "update movie", value = "Update movie")
     public String updateMovie(String title, String genre, int lengthInMinutes) {
-        UserDto loggedInUser = userService.describe().orElse(null);
-
-        if (loggedInUser == null || !loggedInUser.role().equals("admin")) {
-            return "You are not signed in as admin";
-        }
-
         try {
             return movieService.updateMovie(title, genre, lengthInMinutes)
                     .map(movieDto1 -> "Movie updated successfully")
@@ -70,29 +62,13 @@ public class MovieCommands {
         }
     }
 
+    @ShellMethodAvailability("isSignedInAsAdmin")
     @ShellMethod(key = "delete movie", value = "Delete movie")
     public String deleteMovie(String title) {
-        UserDto loggedInUser = userService.describe().orElse(null);
-
-        if (loggedInUser == null || !loggedInUser.role().equals("admin")) {
-            return "You are not signed in as admin";
-        }
-
         try {
             movieService.deleteMovie(title);
 
             return "Movie deleted successfully";
-        } catch (Exception e) {
-            return e.getMessage();
-        }
-    }
-
-    @ShellMethod(key = "get movie", value = "Get movie")
-    public String getMovie(String title) {
-        try {
-            return movieService.getMovie(title)
-                    .map(movieDto -> Movie.fromDto(movieDto).toString())
-                    .orElse("Movie not found");
         } catch (Exception e) {
             return e.getMessage();
         }
@@ -110,5 +86,13 @@ public class MovieCommands {
         } catch (Exception e) {
             return e.getMessage();
         }
+    }
+
+    private Availability isSignedInAsAdmin() {
+        UserDto loggedInUser = userService.describe().orElse(null);
+
+        return loggedInUser != null && loggedInUser.role().equals("admin")
+                ? Availability.available()
+                : Availability.unavailable("You are not signed in as admin");
     }
 }
