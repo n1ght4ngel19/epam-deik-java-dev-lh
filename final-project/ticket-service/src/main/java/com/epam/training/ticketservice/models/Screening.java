@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 import com.epam.training.ticketservice.dtos.ScreeningDto;
 
@@ -15,29 +16,37 @@ import com.epam.training.ticketservice.dtos.ScreeningDto;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "Screenings")
+@Table(name = "Screenings", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"room", "startTime"})
+})
 public class Screening {
     @Id
     @GeneratedValue
     private Long id;
-    @Column(unique = true)
     private String title;
     private String genre;
     private int length;
     private String room;
     private LocalDateTime startTime;
+    private LocalDateTime endTime;
+
 
     public Screening(String title, String genre, int length, String room, LocalDateTime startTime) {
         this.title = title;
+        this.genre = genre;
+        this.length = length;
         this.room = room;
         this.startTime = startTime;
+        this.endTime = startTime.plusMinutes(length);
     }
 
     @Override
     public String toString() {
+        String startString = startTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+
         return String.format(
                 "%s (%s, %d minutes), screened in room %s, at %s\n",
-                title, genre, length, room, startTime.toString());
+                title, genre, length, room, startString);
     }
 
     public static Screening fromDto(ScreeningDto screeningDto) {
