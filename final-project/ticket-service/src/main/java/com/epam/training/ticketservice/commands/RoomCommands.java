@@ -16,6 +16,23 @@ public class RoomCommands {
     private final RoomService roomService;
     private final UserService userService;
 
+    @ShellMethod(key = "mr", value = "Create test room dataset")
+    public String mr() {
+        try {
+            roomService.createRoom("Pedersoli", 10, 10);
+            roomService.createRoom("Bud Spencer", 10, 10);
+            roomService.createRoom("Terence Hill", 10, 10);
+            roomService.createRoom("Havasi", 10, 10);
+            roomService.createRoom("Kossuth", 10, 10);
+            roomService.createRoom("Petőfi", 10, 10);
+            roomService.createRoom("Kertész", 10, 10);
+
+            return "Test dataset created successfully";
+        } catch (Exception e) {
+            return e.getMessage();
+        }
+    }
+
     @ShellMethod(key = "create room", value = "Create room")
     public String createRoom(String name, int rows, int columns) {
         UserDto loggedInUser = userService.describe().orElse(null);
@@ -71,7 +88,7 @@ public class RoomCommands {
     public String getRoom(String name) {
         try {
             return roomService.getRoom(name)
-                    .map(roomDto -> new Room(roomDto.name(), roomDto.rows(), roomDto.columns()).prettyPrint())
+                    .map(roomDto -> Room.fromDto(roomDto).toString())
                     .orElse("Room doesn't exist");
         } catch (Exception e) {
             return e.getMessage();
@@ -84,9 +101,7 @@ public class RoomCommands {
             return roomService.listRooms()
                     .stream()
                     .flatMap(Optional::stream)
-                    .map(roomDto ->
-                            new Room(roomDto.name(), roomDto.rows(), roomDto.columns())
-                                    .prettyPrint())
+                    .map(roomDto -> Room.fromDto(roomDto).toString())
                     .reduce(String::concat)
                     .orElse("There are no rooms at the moment");
         } catch (Exception e) {

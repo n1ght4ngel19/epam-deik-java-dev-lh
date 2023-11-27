@@ -1,5 +1,7 @@
 package com.epam.training.ticketservice.dtos;
 
+import lombok.Builder;
 
-public record MovieDto(String title, String genre, int lengthInMinutes) {
+@Builder
+public record MovieDto(String title, String genre, int length) {
 }

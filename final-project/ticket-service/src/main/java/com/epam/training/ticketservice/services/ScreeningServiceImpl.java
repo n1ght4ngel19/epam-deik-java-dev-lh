@@ -1,11 +1,14 @@
 package com.epam.training.ticketservice.services;
 
 import com.epam.training.ticketservice.dtos.ScreeningDto;
+import com.epam.training.ticketservice.models.Movie;
 import com.epam.training.ticketservice.models.Screening;
+import com.epam.training.ticketservice.repositories.MovieRepository;
 import com.epam.training.ticketservice.repositories.ScreeningRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,35 +16,48 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ScreeningServiceImpl implements ScreeningService {
     private final ScreeningRepository screeningRepository;
+    private final MovieRepository movieRepository;
 
     @Override
-    public Optional<ScreeningDto> createScreening(String movieTitle, String roomName, String startDateTime) {
-        Optional<Screening> screening = Optional.of(new Screening(movieTitle, roomName, startDateTime));
+    public Optional<ScreeningDto> createScreening(String title, String room, LocalDateTime startTime) {
+        Optional<Movie> movie = movieRepository.findByTitle(title);
+
+        if (movie.isEmpty()) {
+            return Optional.empty();
+        }
+
+
+        Optional<Screening> screening = Optional.of(Screening.builder()
+                .title(title)
+                .genre(movie.get().getGenre())
+                .length(movie.get().getLength())
+                .room(room)
+                .startTime(startTime)
+                .build());
 
         screeningRepository.save(screening.get());
 
-        return Optional.of(new ScreeningDto(movieTitle, roomName, startDateTime));
+        return Optional.of(Screening.toDto(screening.get()));
     }
 
     @Override
-    public Optional<ScreeningDto> updateScreening(String movieTitle, String roomName, String startDateTime) {
-        Optional<Screening> screening = screeningRepository.findByMovieTitleAndRoomNameAndStartDateTime(
+    public Optional<ScreeningDto> updateScreening(String movieTitle, String roomName, LocalDateTime startDateTime) {
+        Optional<Screening> screening = screeningRepository.findByTitleAndRoomAndStartTime(
                 movieTitle, roomName, startDateTime);
 
         screening.ifPresent(screening1 -> {
-            screening1.setMovieTitle(movieTitle);
-            screening1.setRoomName(roomName);
-            screening1.setStartDateTime(startDateTime);
+            screening1.setTitle(movieTitle);
+            screening1.setRoom(roomName);
+            screening1.setStartTime(startDateTime);
             screeningRepository.save(screening1);
         });
 
-        return screening.map(screening1 ->
-                new ScreeningDto(screening1.getMovieTitle(), screening1.getRoomName(), screening1.getStartDateTime()));
+        return screening.map(Screening::toDto);
     }
 
     @Override
-    public void deleteScreening(String movieTitle, String roomName, String startDateTime) {
-        Optional<Screening> screening = screeningRepository.findByMovieTitleAndRoomNameAndStartDateTime(
+    public void deleteScreening(String movieTitle, String roomName, LocalDateTime startDateTime) {
+        Optional<Screening> screening = screeningRepository.findByTitleAndRoomAndStartTime(
                 movieTitle, roomName, startDateTime);
 
         screening.ifPresent(screeningRepository::delete);
@@ -52,9 +68,7 @@ public class ScreeningServiceImpl implements ScreeningService {
         return screeningRepository
                 .findAll()
                 .stream()
-                .map(screening ->
-                        Optional.of(new ScreeningDto(screening.getMovieTitle(), screening.getRoomName(),
-                                screening.getStartDateTime())))
+                .map(screening -> Optional.of(Screening.toDto(screening)))
                 .toList();
     }
 }

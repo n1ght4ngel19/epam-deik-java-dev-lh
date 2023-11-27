@@ -16,8 +16,8 @@ public class MovieCommands {
     private final MovieService movieService;
     private final UserService userService;
 
-    @ShellMethod(key = "mk", value = "Create test dataset")
-    public String mk() {
+    @ShellMethod(key = "mm", value = "Create test movie dataset")
+    public String mm() {
         try {
             movieService.createMovie("The Lord of the Rings", "Fantasy", 178);
             movieService.createMovie("The Lord of the Rings: The Two Towers", "Fantasy", 179);
@@ -91,7 +91,7 @@ public class MovieCommands {
     public String getMovie(String title) {
         try {
             return movieService.getMovie(title)
-                    .map(movieDto -> new Movie(title, movieDto.genre(), movieDto.lengthInMinutes()).prettyPrint())
+                    .map(movieDto -> Movie.fromDto(movieDto).toString())
                     .orElse("Movie not found");
         } catch (Exception e) {
             return e.getMessage();
@@ -104,9 +104,7 @@ public class MovieCommands {
             return movieService.listMovies()
                     .stream()
                     .flatMap(Optional::stream)
-                    .map(movieDto ->
-                            new Movie(movieDto.title(), movieDto.genre(), movieDto.lengthInMinutes())
-                                    .prettyPrint())
+                    .map(movieDto -> Movie.fromDto(movieDto).toString())
                     .reduce(String::concat)
                     .orElse("There are no movies at the moment");
         } catch (Exception e) {

@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @ShellComponent
@@ -17,7 +18,7 @@ public class ScreeningCommands {
     private final UserService userService;
 
     @ShellMethod(key = "create screening", value = "Create screening")
-    public String createScreening(String movieTitle, String roomName, String startDateTime) {
+    public String createScreening(String movieTitle, String roomName, LocalDateTime startDateTime) {
         UserDto loggedInUser = userService.describe().orElse(null);
 
         if (loggedInUser == null || !loggedInUser.role().equals("admin")) {
@@ -33,8 +34,9 @@ public class ScreeningCommands {
         }
     }
 
+
     @ShellMethod(key = "update screening", value = "Update screening")
-    public String updateScreening(String movieTitle, String roomName, String startDateTime) {
+    public String updateScreening(String movieTitle, String roomName, LocalDateTime startDateTime) {
         UserDto loggedInUser = userService.describe().orElse(null);
 
         if (loggedInUser == null || !loggedInUser.role().equals("admin")) {
@@ -51,7 +53,7 @@ public class ScreeningCommands {
     }
 
     @ShellMethod(key = "delete screening", value = "Delete screening")
-    public String deleteScreening(String movieTitle, String roomName, String startDateTime) {
+    public String deleteScreening(String movieTitle, String roomName, LocalDateTime startDateTime) {
         UserDto loggedInUser = userService.describe().orElse(null);
 
         if (loggedInUser == null || !loggedInUser.role().equals("admin")) {
@@ -73,9 +75,7 @@ public class ScreeningCommands {
             return screeningService.listScreenings()
                     .stream()
                     .flatMap(Optional::stream)
-                    .map(screeningDto ->
-                            new Screening(screeningDto.movieTitle(), screeningDto.roomName(), screeningDto.startDateTime())
-                                    .prettyPrint())
+                    .map(screeningDto -> Screening.fromDto(screeningDto).toString())
                     .reduce(String::concat)
                     .orElse("There are no screenings");
 

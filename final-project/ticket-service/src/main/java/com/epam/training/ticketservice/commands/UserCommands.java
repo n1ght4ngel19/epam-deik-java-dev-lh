@@ -32,6 +32,17 @@ public class UserCommands {
         }
     }
 
+    @ShellMethod(key = "su", value = "super user")
+    public String adminSignIn() {
+        try {
+            userService.adminSignIn("admin", "admin");
+
+            return "Sign in successful";
+        } catch (Exception e) {
+            return e.getMessage();
+        }
+    }
+
     @ShellMethod(key = "sign out", value = "Sign out")
     public String signOut() {
         try {

@@ -1,5 +1,8 @@
 package com.epam.training.ticketservice.models;
 
+import com.epam.training.ticketservice.dtos.MovieDto;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -11,6 +14,8 @@ import javax.persistence.Table;
 
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Entity
 @Table(name = "Movies")
 public class Movie {
@@ -20,15 +25,32 @@ public class Movie {
     @Column(unique = true)
     private String title;
     private String genre;
-    private int lengthInMinutes;
+    private int length;
 
     public Movie(String title, String genre, int lengthInMinutes) {
         this.title = title;
         this.genre = genre;
-        this.lengthInMinutes = lengthInMinutes;
+        this.length = lengthInMinutes;
     }
 
-    public String prettyPrint() {
-        return String.format("%s (%s, %s minutes)\n", title, genre, lengthInMinutes);
+    @Override
+    public String toString() {
+        return String.format("%s (%s, %s minutes)\n", title, genre, length);
+    }
+
+    public static Movie fromDto(MovieDto movieDto) {
+        return Movie.builder()
+                .title(movieDto.title())
+                .genre(movieDto.genre())
+                .length(movieDto.length())
+                .build();
+    }
+
+    public MovieDto toDto() {
+        return MovieDto.builder()
+                .title(title)
+                .genre(genre)
+                .length(length)
+                .build();
     }
 }

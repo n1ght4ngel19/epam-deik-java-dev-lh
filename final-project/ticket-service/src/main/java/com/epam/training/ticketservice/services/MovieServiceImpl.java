@@ -30,12 +30,12 @@ public class MovieServiceImpl implements MovieService {
         movie.ifPresent(movie1 -> {
             movie1.setTitle(title);
             movie1.setGenre(genre);
-            movie1.setLengthInMinutes(lengthInMinutes);
+            movie1.setLength(lengthInMinutes);
             movieRepository.save(movie1);
         });
 
         return movie.map(movie1 ->
-                new MovieDto(movie1.getTitle(), movie1.getGenre(), movie1.getLengthInMinutes()));
+                new MovieDto(movie1.getTitle(), movie1.getGenre(), movie1.getLength()));
     }
 
     @Override
@@ -50,7 +50,7 @@ public class MovieServiceImpl implements MovieService {
         Optional<Movie> movie = movieRepository.findByTitle(title);
 
         return movie.map(movie1 ->
-                new MovieDto(movie1.getTitle(), movie1.getGenre(), movie1.getLengthInMinutes()));
+                new MovieDto(movie1.getTitle(), movie1.getGenre(), movie1.getLength()));
     }
 
     @Override
@@ -59,7 +59,7 @@ public class MovieServiceImpl implements MovieService {
                 .findAll()
                 .stream()
                 .map(movie ->
-                        Optional.of(new MovieDto(movie.getTitle(), movie.getGenre(), movie.getLengthInMinutes())))
+                        Optional.of(new MovieDto(movie.getTitle(), movie.getGenre(), movie.getLength())))
                 .toList();
     }
 }
