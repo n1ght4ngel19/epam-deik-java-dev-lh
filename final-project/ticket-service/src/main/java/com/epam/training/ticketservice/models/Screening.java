@@ -5,7 +5,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -17,7 +21,7 @@ import com.epam.training.ticketservice.dtos.ScreeningDto;
 @Builder
 @Entity
 @Table(name = "Screenings", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"room", "startTime"})
+    @UniqueConstraint(columnNames = {"room", "startTime"})
 })
 public class Screening {
     @Id
@@ -56,6 +60,7 @@ public class Screening {
                 .length(screeningDto.length())
                 .room(screeningDto.room())
                 .startTime(screeningDto.startTime())
+                .endTime(screeningDto.endTime())
                 .build();
     }
 
@@ -66,6 +71,7 @@ public class Screening {
                 .length(screening.length)
                 .room(screening.room)
                 .startTime(screening.startTime)
+                .endTime(screening.endTime)
                 .build();
     }
 }

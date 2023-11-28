@@ -1,7 +1,7 @@
 package com.epam.training.ticketservice.commands;
 
 import com.epam.training.ticketservice.dtos.UserDto;
-import com.epam.training.ticketservice.exceptions.CreationException;
+import com.epam.training.ticketservice.exceptions.ScreeningException;
 import com.epam.training.ticketservice.models.Screening;
 import com.epam.training.ticketservice.services.ScreeningService;
 import com.epam.training.ticketservice.services.UserService;
@@ -25,8 +25,8 @@ public class ScreeningCommands {
         try {
             return screeningService.createScreening(movieTitle, roomName, start)
                     .map(screeningDto -> "Screening created successfully")
-                    .orElseThrow(() -> new CreationException("Couldn't create screening"));
-        } catch (CreationException e) {
+                    .orElseThrow(() -> new ScreeningException("Couldn't create screening"));
+        } catch (ScreeningException e) {
             return e.getMessage();
         }
     }

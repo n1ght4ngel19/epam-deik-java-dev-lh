@@ -46,11 +46,11 @@ public class Movie {
                 .build();
     }
 
-    public MovieDto toDto() {
+    public static MovieDto toDto(Movie movie) {
         return MovieDto.builder()
-                .title(title)
-                .genre(genre)
-                .length(length)
+                .title(movie.title)
+                .genre(movie.genre)
+                .length(movie.length)
                 .build();
     }
 }

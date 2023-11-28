@@ -35,17 +35,17 @@ teszteket az IntelliJ-n belül futtatjuk.
 #### Általános követelmények a forráskóddal és az alkalmazással kapcsolatban
 
 * [x] A forráskód elérhető egy nyilvános repóban
-* Az `mvn clean verify` a sikeresen lefut a `ticket-service-parent` projekten. Ehhez a következők szükségesek
-    * A `@grade2-requirements` tag-gel megjelölt acceptance tesztekben leírt követelményeknek megfelelő alkalmazás.
-    * Legalább 40%-os unit teszt branch és line coverage az egész `ticket-service` modulra vonatkoztatva.
+* [x] Az `mvn clean verify` a sikeresen lefut a `ticket-service-parent` projekten. Ehhez a következők szükségesek
+    * [x] A `@grade2-requirements` tag-gel megjelölt acceptance tesztekben leírt követelményeknek megfelelő alkalmazás.
+    * [ ] Legalább 40%-os unit teszt branch és line coverage az egész `ticket-service` modulra vonatkoztatva.
 * [x] A forráskód könnyen kiterjeszthető és követi a clean code és OOP fejlesztésre vonatkozó irányelveket.
     * Az irányelvektől való eltérést meg kell tudnod indokolni.
-* Az alkalmazás Spring-et használ a DI megvalósításához.
+* [x] Az alkalmazás Spring-et használ a DI megvalósításához.
 * [x] Az alkalmazás Spring Data JPA-t használ az adat eléréshez
-    * Ehhez használj egy in-memory, beágyazott (pl. H2) adatbázist
-* Spring Boot használható 
+    * [x] Ehhez használj egy in-memory, beágyazott (pl. H2) adatbázist
+* [x] Spring Boot használható 
 * [x] A 'Ticket service>' prompt kerül kiírásra, amint az alkalmazás készen áll arra, hogy bemenetet fogadjon a felhasználótól
-* Az alkalmazás a standard kimenetre ír és a standard bemenetről olvas
+* [x] Az alkalmazás a standard kimenetre ír és a standard bemenetről olvas
 
 #### Az alkalmazás által támogatott parancsok
 
@@ -218,13 +218,13 @@ időpontban létrehozható a következőképpen:
 ```
 create screening "Spirited Away" Pedersoli "2021-03-14 16:00"
 ```
-* [ ] Nem hozható létre a vetítés akkor, ha:
-    * [ ] A vetítés időtartama bele esik egy másik, azonos teremben történő másik vetítés időtartamába. 
+* [x] Nem hozható létre a vetítés akkor, ha:
+    * [x] A vetítés időtartama bele esik egy másik, azonos teremben történő másik vetítés időtartamába. 
     A kimenet ebben az esetben:
     ```
     There is an overlapping screening
     ``` 
-    * [ ] A vetítés időtartama bele esik egy másik, azonos teremben történő vetítés utáni 10 perces szünetbe (amely lehetőséget
+    * [x] A vetítés időtartama bele esik egy másik, azonos teremben történő vetítés utáni 10 perces szünetbe (amely lehetőséget
     biztosít például a terem előkészítésére a következő vetítésre). A kimenet ebben az esetben:
     ```
     This would start in the break period after another screening in this room
@@ -267,11 +267,11 @@ Sátántangó (drama, 450 minutes), screened in room Pedersoli, at 2021-03-15 11
 #### Általános követelmények a forráskóddal és az alkalmazással kapcsolatban
 
 * [ ] A kettes jegy minden követelménye teljesül
-* [ ] Az `mvn clean verify -P requirements-grade3` sikeresen lefut 
+* [x] Az `mvn clean verify -P requirements-grade3` sikeresen lefut 
 a `ticket-service-parent` projekten. Ehhez a kettes érdemjegy eléréséhez szükséges 
 feltételeken túl a következők szükségesek:
-    * [ ] Nincsenek checkstyle warning-ok.
-* [ ] Az alkalmazás Spring Shell-t használ.
+    * [x] Nincsenek checkstyle warning-ok.
+* [x] Az alkalmazás Spring Shell-t használ.
 
 ### Követelmények a négyes jegyhez
 

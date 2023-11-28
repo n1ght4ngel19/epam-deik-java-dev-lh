@@ -1,7 +1,7 @@
 package com.epam.training.ticketservice.services;
 
 import com.epam.training.ticketservice.dtos.ScreeningDto;
-import com.epam.training.ticketservice.exceptions.CreationException;
+import com.epam.training.ticketservice.exceptions.ScreeningException;
 import com.epam.training.ticketservice.models.Movie;
 import com.epam.training.ticketservice.models.Room;
 import com.epam.training.ticketservice.models.Screening;
@@ -24,42 +24,25 @@ public class ScreeningServiceImpl implements ScreeningService {
     private final RoomRepository roomRepository;
 
     @Override
-    public Optional<ScreeningDto> createScreening(String title, String roomName, String start) throws CreationException {
-        Optional<Movie> movie = movieRepository.findByTitle(title);
+    public Optional<ScreeningDto> createScreening(String title, String roomName, String start)
+            throws ScreeningException {
+        Optional<Movie> movie;
+        movie = movieRepository.findByTitle(title);
 
         if (movie.isEmpty()) {
-            throw new CreationException("Movie not found");
+            throw new ScreeningException("Movie not found");
         }
 
         Optional<Room> room = roomRepository.findByName(roomName);
 
         if (room.isEmpty()) {
-            throw new CreationException("Room not found");
+            throw new ScreeningException("Room not found");
         }
 
         LocalDateTime startDateTime = LocalDateTime.parse(start, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
         LocalDateTime endDateTime = startDateTime.plusMinutes(movie.get().getLength());
-        LocalDateTime breakEndDateTime = endDateTime.plusMinutes(10);
 
-        Optional<Screening> overlap =
-                screeningRepository.findByRoom(roomName)
-                        .stream()
-                        .flatMap(Optional::stream)
-                        .filter(scr -> startDateTime.isAfter(scr.getStartTime()) &&
-                                startDateTime.isBefore(scr.getEndTime()))
-                        .findFirst();
-
-        if (overlap.isPresent()) {
-            throw new CreationException("There is an overlapping screening");
-        }
-
-        Optional<Screening> breakOverlap =
-                screeningRepository.findByRoomAndStartTimeGreaterThanEqualAndStartTimeLessThanEqual
-                        (roomName, endDateTime, breakEndDateTime);
-
-        if (breakOverlap.isPresent()) {
-            throw new CreationException("This would start in the break period after another screening in this room");
-        }
+        validateOverlap(roomName, startDateTime, endDateTime);
 
         Optional<Screening> screening = Optional.of(Screening.builder()
                 .title(title)
@@ -67,6 +50,7 @@ public class ScreeningServiceImpl implements ScreeningService {
                 .length(movie.get().getLength())
                 .room(roomName)
                 .startTime(startDateTime)
+                .endTime(endDateTime)
                 .build());
 
         screeningRepository.save(screening.get());
@@ -75,54 +59,39 @@ public class ScreeningServiceImpl implements ScreeningService {
     }
 
     @Override
-    public Optional<ScreeningDto> updateScreening(String movieTitle, String roomName, String start) {
+    public Optional<ScreeningDto> updateScreening(String movieTitle, String roomName, String start)
+            throws ScreeningException {
         Optional<Movie> movie = movieRepository.findByTitle(movieTitle);
 
         if (movie.isEmpty()) {
-            // No movie found in database
-            return Optional.empty();
+            throw new ScreeningException("Movie not found");
         }
 
         Optional<Room> room = roomRepository.findByName(roomName);
 
         if (room.isEmpty()) {
-            // No room found in database
-            return Optional.empty();
+            throw new ScreeningException("Room not found");
         }
 
-        LocalDateTime startDateTime =
-                LocalDateTime.parse(start, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
-        LocalDateTime endDateTime =
-                startDateTime.plusMinutes(movie.get().getLength());
-        LocalDateTime breakEndDateTime =
-                endDateTime.plusMinutes(10);
+        LocalDateTime startDateTime = LocalDateTime.parse(start, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+        LocalDateTime endDateTime = startDateTime.plusMinutes(movie.get().getLength());
 
-        if (screeningRepository.existsByRoomAndStartTimeGreaterThanEqualAndStartTimeLessThanEqual
-                (roomName, startDateTime, endDateTime)) {
-            System.out.println("There is an overlapping screening");
-
-            return Optional.empty();
-        }
-
-        if (screeningRepository.existsByRoomAndStartTimeGreaterThanEqualAndStartTimeLessThanEqual
-                (roomName, endDateTime, breakEndDateTime)) {
-            System.out.println("This would start in the break period after another screening in this room");
-
-            return Optional.empty();
-        }
+        validateOverlap(roomName, startDateTime, endDateTime);
 
         Optional<Screening> screening = screeningRepository.findByTitleAndRoomAndStartTime(
                 movieTitle, roomName, startDateTime);
 
         if (screening.isEmpty()) {
-            // No screening found in database
-            return Optional.empty();
+            throw new ScreeningException("No screening to update");
         }
 
         screening.ifPresent(screening1 -> {
             screening1.setTitle(movieTitle);
+            screening1.setGenre(movie.get().getGenre());
+            screening1.setLength(movie.get().getLength());
             screening1.setRoom(roomName);
             screening1.setStartTime(startDateTime);
+            screening1.setEndTime(endDateTime);
             screeningRepository.save(screening1);
         });
 
@@ -146,5 +115,62 @@ public class ScreeningServiceImpl implements ScreeningService {
                 .stream()
                 .map(screening -> Optional.of(Screening.toDto(screening)))
                 .toList();
+    }
+
+    private Optional<Screening> checkBreakAfterOverlap(String roomName, LocalDateTime startDateTime) {
+        return screeningRepository.findByRoom(roomName)
+                .stream()
+                .flatMap(Optional::stream)
+                .filter(scr -> startDateTime.isAfter(scr.getEndTime())
+                        && startDateTime.isBefore(scr.getEndTime().plusMinutes(10)))
+                .findFirst();
+    }
+
+    private Optional<Screening> checkBreakBeforeOverlap(String roomName, LocalDateTime endDateTime) {
+        return screeningRepository.findByRoom(roomName)
+                .stream()
+                .flatMap(Optional::stream)
+                .filter(scr -> endDateTime.isAfter(scr.getStartTime().minusMinutes(10))
+                        && endDateTime.isBefore(scr.getStartTime().plusMinutes(1)))
+                .findFirst();
+    }
+
+    private Optional<Screening> checkOverlap(String roomName, LocalDateTime startDateTime, LocalDateTime endDateTime) {
+        return screeningRepository.findByRoom(roomName)
+                .stream()
+                .flatMap(Optional::stream)
+                .filter(scr -> (startDateTime.isAfter(scr.getStartTime())
+                        && startDateTime.isBefore(scr.getEndTime()))
+                        || (startDateTime.isBefore(scr.getStartTime())
+                        && endDateTime.isAfter(scr.getStartTime()))
+                        || (startDateTime.isEqual(scr.getStartTime())
+                        || startDateTime.isEqual(scr.getEndTime()))
+                )
+                .findFirst();
+    }
+
+    private void validateOverlap(String roomName, LocalDateTime startDateTime, LocalDateTime endDateTime)
+            throws ScreeningException {
+        Optional<Screening> overlap = checkOverlap(roomName, startDateTime, endDateTime);
+
+        if (overlap.isPresent()) {
+            throw new ScreeningException("There is an overlapping screening");
+        }
+
+        Optional<Screening> breakAfterOverlap = checkBreakAfterOverlap(roomName, startDateTime);
+
+        if (breakAfterOverlap.isPresent()) {
+            throw new ScreeningException(
+                    "This would start in the break period after another screening in this room"
+            );
+        }
+
+        Optional<Screening> breakBeforeOverlap = checkBreakBeforeOverlap(roomName, endDateTime);
+
+        if (breakBeforeOverlap.isPresent()) {
+            throw new ScreeningException(
+                    "This would not grant a 10 minute break period before another screening in this room"
+            );
+        }
     }
 }
