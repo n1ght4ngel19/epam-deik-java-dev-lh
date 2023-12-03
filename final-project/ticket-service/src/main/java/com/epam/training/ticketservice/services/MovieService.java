@@ -1,18 +1,18 @@
 package com.epam.training.ticketservice.services;
 
 import com.epam.training.ticketservice.dtos.MovieDto;
+import com.epam.training.ticketservice.exceptions.MovieAlreadyExistsException;
+import com.epam.training.ticketservice.exceptions.MovieDoesNotExistException;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface MovieService {
-    Optional<MovieDto> createMovie(String title, String genre, int lengthInMinutes);
+    void createMovie(String title, String genre, int lengthInMinutes) throws MovieAlreadyExistsException;
 
-    Optional<MovieDto> updateMovie(String title, String genre, int lengthInMinutes);
+    void updateMovie(String title, String genre, int lengthInMinutes) throws MovieDoesNotExistException;
 
-    void deleteMovie(String title);
+    void deleteMovie(String title) throws MovieDoesNotExistException;
 
-    Optional<MovieDto> getMovie(String title);
-
-    List<Optional<MovieDto>> listMovies();
+    List<Optional<MovieDto>> listMovies() throws MovieDoesNotExistException;
 }

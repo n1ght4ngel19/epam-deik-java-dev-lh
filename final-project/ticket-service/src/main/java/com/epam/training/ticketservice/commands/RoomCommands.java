@@ -37,9 +37,9 @@ public class RoomCommands {
     @ShellMethod(key = "create room", value = "Create room")
     public String createRoom(String name, int rows, int columns) {
         try {
-            return roomService.createRoom(name, rows, columns)
-                    .map(roomDto -> roomDto.name() + " room created successfully")
-                    .orElse("Room creation failed due to general error");
+            roomService.createRoom(name, rows, columns);
+
+            return ("Room created successfully");
         } catch (Exception e) {
             return e.getMessage();
         }
@@ -49,9 +49,9 @@ public class RoomCommands {
     @ShellMethod(key = "update room", value = "Update room")
     public String updateRoom(String name, int rows, int columns) {
         try {
-            return roomService.updateRoom(name, rows, columns)
-                    .map(roomDto -> roomDto.name() + " room updated successfully")
-                    .orElse("Room update failed due to general error");
+            roomService.updateRoom(name, rows, columns);
+
+            return ("Room updated successfully");
         } catch (Exception e) {
             return e.getMessage();
         }

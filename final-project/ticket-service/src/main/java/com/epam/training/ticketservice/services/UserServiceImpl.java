@@ -1,6 +1,9 @@
 package com.epam.training.ticketservice.services;
 
 import com.epam.training.ticketservice.dtos.UserDto;
+import com.epam.training.ticketservice.exceptions.UserAlreadyExistsException;
+import com.epam.training.ticketservice.exceptions.UserNotFoundException;
+import com.epam.training.ticketservice.exceptions.UserNotSignedInException;
 import com.epam.training.ticketservice.models.User;
 import com.epam.training.ticketservice.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -15,56 +18,76 @@ public class UserServiceImpl implements UserService {
     private UserDto currentUser;
 
     @Override
-    public void signIn(String username, String password) {
+    public void signIn(String username, String password) throws UserNotFoundException, IllegalArgumentException {
+        if (userRepository.findByUsername(username).isEmpty()) {
+            throw new UserNotFoundException();
+        }
+
         Optional<User> user = userRepository.findByUsernameAndPassword(username, password);
 
-        user.ifPresentOrElse(
-                (value) -> {
-                    currentUser = new UserDto(value.getUsername(), value.getPassword(), value.getRole());
-                },
-                () -> {
-                    throw new IllegalArgumentException("Login failed due to incorrect credentials");
-                }
+        if (user.isEmpty()) {
+            throw new IllegalArgumentException("Login failed due to incorrect credentials");
+        }
+
+        currentUser = new UserDto(
+                user.get().getUsername(),
+                user.get().getPassword(),
+                user.get().getRole()
         );
     }
 
     @Override
-    public void adminSignIn(String username, String password) {
-        Optional<User> user = userRepository.findByUsernameAndPasswordAndRole(username, password, "admin");
+    public void adminSignIn(String username, String password) throws IllegalArgumentException {
+        Optional<User> adminUser = userRepository.findByUsernameAndPasswordAndRole(username, password, "admin");
 
-        user.ifPresentOrElse(
-                (value) -> {
-                    currentUser = new UserDto(value.getUsername(), value.getPassword(), value.getRole());
-                },
-                () -> {
-                    throw new IllegalArgumentException("Login failed due to incorrect credentials");
-                }
+        if (adminUser.isEmpty()) {
+            throw new IllegalArgumentException("Login failed due to incorrect credentials");
+        }
+
+        currentUser = new UserDto(
+                adminUser.get().getUsername(),
+                adminUser.get().getPassword(),
+                adminUser.get().getRole()
         );
     }
 
     @Override
-    public void signOut() {
+    public void signOut() throws UserNotSignedInException {
+        if (currentUser == null) {
+            throw new UserNotSignedInException();
+        }
+
         currentUser = null;
     }
 
     @Override
-    public Optional<UserDto> describe() {
-        return Optional.ofNullable(currentUser);
+    public Optional<UserDto> describe() throws UserNotSignedInException {
+        if (currentUser == null) {
+            throw new UserNotSignedInException();
+        }
+
+        return Optional.of(currentUser);
     }
 
     @Override
-    public Optional<UserDto> signUp(String username, String password, String role) {
+    public void signUp(String username, String password, String role) throws UserAlreadyExistsException {
+        if (userRepository.findByUsername(username).isPresent()) {
+            throw new UserAlreadyExistsException();
+        }
+
         Optional<User> user = Optional.of(new User(username, password, role));
 
         userRepository.save(user.get());
-
-        return Optional.of(new UserDto(username, password, role));
     }
 
     @Override
-    public void deleteUser(String username) {
+    public void deleteUser(String username) throws UserNotFoundException {
         Optional<User> user = userRepository.findByUsername(username);
 
-        user.ifPresent(userRepository::delete);
+        if (user.isEmpty()) {
+            throw new UserNotFoundException();
+        }
+
+        userRepository.delete(user.get());
     }
 }

@@ -99,6 +99,17 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>**/models/**</exclude>
+                        <exclude>**/dtos/**</exclude>
+                        <exclude>**/repositories/**</exclude>
+                        <exclude>**/db/**</exclude>
+                        <exclude>**/configs/**</exclude>
+                        <exclude>**/exceptions/**</exclude>
+                        <exclude>**/Application.class</exclude>
+                    </excludes>
+                </configuration>
                 <version>${jacoco-maven-plugin.version}</version>
                 <executions>
                     <execution>

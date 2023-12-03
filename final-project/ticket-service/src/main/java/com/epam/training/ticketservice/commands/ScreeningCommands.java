@@ -1,7 +1,6 @@
 package com.epam.training.ticketservice.commands;
 
 import com.epam.training.ticketservice.dtos.UserDto;
-import com.epam.training.ticketservice.exceptions.ScreeningException;
 import com.epam.training.ticketservice.models.Screening;
 import com.epam.training.ticketservice.services.ScreeningService;
 import com.epam.training.ticketservice.services.UserService;
@@ -23,10 +22,9 @@ public class ScreeningCommands {
     @ShellMethod(key = "create screening", value = "Create screening")
     public String createScreening(String movieTitle, String roomName, String start) {
         try {
-            return screeningService.createScreening(movieTitle, roomName, start)
-                    .map(screeningDto -> "Screening created successfully")
-                    .orElseThrow(() -> new ScreeningException("Couldn't create screening"));
-        } catch (ScreeningException e) {
+            screeningService.createScreening(movieTitle, roomName, start);
+            return "Screening created successfully";
+        } catch (RuntimeException e) {
             return e.getMessage();
         }
     }
@@ -36,10 +34,10 @@ public class ScreeningCommands {
     @ShellMethod(key = "update screening", value = "Update screening")
     public String updateScreening(String movieTitle, String roomName, String startDateTime) {
         try {
-            return screeningService.updateScreening(movieTitle, roomName, startDateTime)
-                    .map(screeningDto -> "Screening updated successfully")
-                    .orElse("Screening update failed");
-        } catch (Exception e) {
+            screeningService.updateScreening(movieTitle, roomName, startDateTime);
+
+            return "Screening updated successfully";
+        } catch (RuntimeException e) {
             return e.getMessage();
         }
     }
@@ -51,7 +49,7 @@ public class ScreeningCommands {
             screeningService.deleteScreening(movieTitle, roomName, startDateTime);
 
             return "Screening deleted successfully";
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             return e.getMessage();
         }
     }
@@ -65,7 +63,7 @@ public class ScreeningCommands {
                     .map(screeningDto -> Screening.fromDto(screeningDto).toString())
                     .reduce(String::concat)
                     .orElse("There are no screenings");
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             return e.getMessage();
         }
     }

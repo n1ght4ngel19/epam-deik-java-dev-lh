@@ -1,6 +1,8 @@
 package com.epam.training.ticketservice.services;
 
 import com.epam.training.ticketservice.dtos.MovieDto;
+import com.epam.training.ticketservice.exceptions.MovieAlreadyExistsException;
+import com.epam.training.ticketservice.exceptions.MovieDoesNotExistException;
 import com.epam.training.ticketservice.models.Movie;
 import com.epam.training.ticketservice.repositories.MovieRepository;
 import lombok.RequiredArgsConstructor;
@@ -15,17 +17,23 @@ public class MovieServiceImpl implements MovieService {
     private final MovieRepository movieRepository;
 
     @Override
-    public Optional<MovieDto> createMovie(String title, String genre, int lengthInMinutes) {
+    public void createMovie(String title, String genre, int lengthInMinutes) throws MovieAlreadyExistsException {
+        if (movieRepository.findByTitle(title).isPresent()) {
+            throw new MovieAlreadyExistsException();
+        }
+
         Optional<Movie> movie = Optional.of(new Movie(title, genre, lengthInMinutes));
 
         movieRepository.save(movie.get());
-
-        return Optional.of(new MovieDto(title, genre, lengthInMinutes));
     }
 
     @Override
-    public Optional<MovieDto> updateMovie(String title, String genre, int lengthInMinutes) {
+    public void updateMovie(String title, String genre, int lengthInMinutes) throws MovieDoesNotExistException {
         Optional<Movie> movie = movieRepository.findByTitle(title);
+
+        if (movie.isEmpty()) {
+            throw new MovieDoesNotExistException();
+        }
 
         movie.ifPresent(movie1 -> {
             movie1.setTitle(title);
@@ -33,31 +41,28 @@ public class MovieServiceImpl implements MovieService {
             movie1.setLength(lengthInMinutes);
             movieRepository.save(movie1);
         });
-
-        return movie.map(movie1 ->
-                new MovieDto(movie1.getTitle(), movie1.getGenre(), movie1.getLength()));
     }
 
     @Override
-    public void deleteMovie(String title) {
+    public void deleteMovie(String title) throws MovieDoesNotExistException {
         Optional<Movie> movie = movieRepository.findByTitle(title);
 
-        movie.ifPresent(movieRepository::delete);
+        if (movie.isEmpty()) {
+            throw new MovieDoesNotExistException();
+        }
+
+        movieRepository.delete(movie.get());
     }
 
     @Override
-    public Optional<MovieDto> getMovie(String title) {
-        Optional<Movie> movie = movieRepository.findByTitle(title);
+    public List<Optional<MovieDto>> listMovies() throws MovieDoesNotExistException {
+        List<Movie> movies = movieRepository.findAll();
 
-        return movie.map(movie1 ->
-                new MovieDto(movie1.getTitle(), movie1.getGenre(), movie1.getLength()));
-    }
+        if (movies.isEmpty()) {
+            throw new MovieDoesNotExistException();
+        }
 
-    @Override
-    public List<Optional<MovieDto>> listMovies() {
-        return movieRepository
-                .findAll()
-                .stream()
+        return movies.stream()
                 .map(movie ->
                         Optional.of(new MovieDto(movie.getTitle(), movie.getGenre(), movie.getLength())))
                 .toList();

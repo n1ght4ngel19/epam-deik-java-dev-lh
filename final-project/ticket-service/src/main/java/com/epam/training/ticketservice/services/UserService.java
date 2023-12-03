@@ -1,19 +1,22 @@
 package com.epam.training.ticketservice.services;
 
 import com.epam.training.ticketservice.dtos.UserDto;
+import com.epam.training.ticketservice.exceptions.UserAlreadyExistsException;
+import com.epam.training.ticketservice.exceptions.UserNotFoundException;
+import com.epam.training.ticketservice.exceptions.UserNotSignedInException;
 
 import java.util.Optional;
 
 public interface UserService {
-    void signIn(String username, String password);
+    void signIn(String username, String password) throws UserNotFoundException;
 
     void adminSignIn(String username, String password);
 
-    void signOut();
+    void signOut() throws UserNotFoundException;
 
-    Optional<UserDto> describe();
+    Optional<UserDto> describe() throws UserNotSignedInException;
 
-    Optional<UserDto> signUp(String username, String password, String role);
+    void signUp(String username, String password, String role) throws UserAlreadyExistsException;
 
-    void deleteUser(String username);
+    void deleteUser(String username) throws UserNotFoundException;
 }

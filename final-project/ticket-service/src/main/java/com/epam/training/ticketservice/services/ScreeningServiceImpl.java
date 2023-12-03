@@ -1,7 +1,7 @@
 package com.epam.training.ticketservice.services;
 
 import com.epam.training.ticketservice.dtos.ScreeningDto;
-import com.epam.training.ticketservice.exceptions.ScreeningException;
+import com.epam.training.ticketservice.exceptions.*;
 import com.epam.training.ticketservice.models.Movie;
 import com.epam.training.ticketservice.models.Room;
 import com.epam.training.ticketservice.models.Screening;
@@ -24,19 +24,19 @@ public class ScreeningServiceImpl implements ScreeningService {
     private final RoomRepository roomRepository;
 
     @Override
-    public Optional<ScreeningDto> createScreening(String title, String roomName, String start)
-            throws ScreeningException {
+    public void createScreening(String title, String roomName, String start)
+            throws ScreeningAlreadyExistsException, ScreeningOverlapException {
         Optional<Movie> movie;
         movie = movieRepository.findByTitle(title);
 
         if (movie.isEmpty()) {
-            throw new ScreeningException("Movie not found");
+            throw new MovieDoesNotExistException();
         }
 
         Optional<Room> room = roomRepository.findByName(roomName);
 
         if (room.isEmpty()) {
-            throw new ScreeningException("Room not found");
+            throw new RoomDoesNotExistException();
         }
 
         LocalDateTime startDateTime = LocalDateTime.parse(start, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
@@ -54,23 +54,21 @@ public class ScreeningServiceImpl implements ScreeningService {
                 .build());
 
         screeningRepository.save(screening.get());
-
-        return Optional.of(Screening.toDto(screening.get()));
     }
 
     @Override
-    public Optional<ScreeningDto> updateScreening(String movieTitle, String roomName, String start)
-            throws ScreeningException {
+    public void updateScreening(String movieTitle, String roomName, String start)
+            throws ScreeningOverlapException, MovieDoesNotExistException, RoomDoesNotExistException {
         Optional<Movie> movie = movieRepository.findByTitle(movieTitle);
 
         if (movie.isEmpty()) {
-            throw new ScreeningException("Movie not found");
+            throw new MovieDoesNotExistException();
         }
 
         Optional<Room> room = roomRepository.findByName(roomName);
 
         if (room.isEmpty()) {
-            throw new ScreeningException("Room not found");
+            throw new RoomDoesNotExistException();
         }
 
         LocalDateTime startDateTime = LocalDateTime.parse(start, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
@@ -82,7 +80,7 @@ public class ScreeningServiceImpl implements ScreeningService {
                 movieTitle, roomName, startDateTime);
 
         if (screening.isEmpty()) {
-            throw new ScreeningException("No screening to update");
+            throw new ScreeningOverlapException("No screening to update");
         }
 
         screening.ifPresent(screening1 -> {
@@ -94,25 +92,31 @@ public class ScreeningServiceImpl implements ScreeningService {
             screening1.setEndTime(endDateTime);
             screeningRepository.save(screening1);
         });
-
-        return screening.map(Screening::toDto);
     }
 
     @Override
-    public void deleteScreening(String movieTitle, String roomName, String start) {
+    public void deleteScreening(String movieTitle, String roomName, String start) throws ScreeningDoesNotExistException {
         LocalDateTime startDateTime = LocalDateTime.parse(start, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
 
         Optional<Screening> screening = screeningRepository.findByTitleAndRoomAndStartTime(
                 movieTitle, roomName, startDateTime);
 
-        screening.ifPresent(screeningRepository::delete);
+        if (screening.isEmpty()) {
+            throw new ScreeningDoesNotExistException();
+        }
+
+        screeningRepository.delete(screening.get());
     }
 
     @Override
-    public List<Optional<ScreeningDto>> listScreenings() {
-        return screeningRepository
-                .findAll()
-                .stream()
+    public List<Optional<ScreeningDto>> listScreenings() throws ScreeningDoesNotExistException {
+        List<Screening> screenings = screeningRepository.findAll();
+
+        if (screenings.isEmpty()) {
+            throw new ScreeningDoesNotExistException();
+        }
+
+        return screenings.stream()
                 .map(screening -> Optional.of(Screening.toDto(screening)))
                 .toList();
     }
@@ -150,17 +154,17 @@ public class ScreeningServiceImpl implements ScreeningService {
     }
 
     private void validateOverlap(String roomName, LocalDateTime startDateTime, LocalDateTime endDateTime)
-            throws ScreeningException {
+            throws ScreeningOverlapException {
         Optional<Screening> overlap = checkOverlap(roomName, startDateTime, endDateTime);
 
         if (overlap.isPresent()) {
-            throw new ScreeningException("There is an overlapping screening");
+            throw new ScreeningOverlapException("There is an overlapping screening");
         }
 
         Optional<Screening> breakAfterOverlap = checkBreakAfterOverlap(roomName, startDateTime);
 
         if (breakAfterOverlap.isPresent()) {
-            throw new ScreeningException(
+            throw new ScreeningOverlapException(
                     "This would start in the break period after another screening in this room"
             );
         }
@@ -168,7 +172,7 @@ public class ScreeningServiceImpl implements ScreeningService {
         Optional<Screening> breakBeforeOverlap = checkBreakBeforeOverlap(roomName, endDateTime);
 
         if (breakBeforeOverlap.isPresent()) {
-            throw new ScreeningException(
+            throw new ScreeningOverlapException(
                     "This would not grant a 10 minute break period before another screening in this room"
             );
         }

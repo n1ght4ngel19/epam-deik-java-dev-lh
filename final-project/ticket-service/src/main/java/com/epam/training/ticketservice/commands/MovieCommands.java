@@ -1,6 +1,8 @@
 package com.epam.training.ticketservice.commands;
 
 import com.epam.training.ticketservice.dtos.UserDto;
+import com.epam.training.ticketservice.exceptions.MovieAlreadyExistsException;
+import com.epam.training.ticketservice.exceptions.MovieDoesNotExistException;
 import com.epam.training.ticketservice.models.Movie;
 import com.epam.training.ticketservice.services.MovieService;
 import com.epam.training.ticketservice.services.UserService;
@@ -42,10 +44,10 @@ public class MovieCommands {
     @ShellMethod(key = "create movie", value = "Create movie")
     public String createMovie(String title, String genre, int lengthInMinutes) {
         try {
-            return movieService.createMovie(title, genre, lengthInMinutes)
-                    .map(movieDto1 -> "Movie created successfully")
-                    .orElse("Movie already exists");
-        } catch (Exception e) {
+            movieService.createMovie(title, genre, lengthInMinutes);
+
+            return "Movie created successfully";
+        } catch (MovieAlreadyExistsException e) {
             return e.getMessage();
         }
     }
@@ -54,10 +56,10 @@ public class MovieCommands {
     @ShellMethod(key = "update movie", value = "Update movie")
     public String updateMovie(String title, String genre, int lengthInMinutes) {
         try {
-            return movieService.updateMovie(title, genre, lengthInMinutes)
-                    .map(movieDto1 -> "Movie updated successfully")
-                    .orElse("Movie doesn't exist");
-        } catch (Exception e) {
+            movieService.updateMovie(title, genre, lengthInMinutes);
+
+            return "Movie updated successfully";
+        } catch (MovieDoesNotExistException e) {
             return e.getMessage();
         }
     }
@@ -69,7 +71,7 @@ public class MovieCommands {
             movieService.deleteMovie(title);
 
             return "Movie deleted successfully";
-        } catch (Exception e) {
+        } catch (MovieDoesNotExistException e) {
             return e.getMessage();
         }
     }

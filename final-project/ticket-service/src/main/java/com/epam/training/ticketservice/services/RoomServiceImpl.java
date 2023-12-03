@@ -1,6 +1,8 @@
 package com.epam.training.ticketservice.services;
 
 import com.epam.training.ticketservice.dtos.RoomDto;
+import com.epam.training.ticketservice.exceptions.RoomAlreadyExistsException;
+import com.epam.training.ticketservice.exceptions.RoomDoesNotExistException;
 import com.epam.training.ticketservice.models.Room;
 import com.epam.training.ticketservice.repositories.RoomRepository;
 import lombok.RequiredArgsConstructor;
@@ -15,36 +17,23 @@ public class RoomServiceImpl implements RoomService {
     private final RoomRepository roomRepository;
 
     @Override
-    public List<Optional<RoomDto>> listRooms() {
-        return roomRepository
-                .findAll()
-                .stream()
-                .map(room ->
-                        Optional.of(new RoomDto(room.getName(), room.getRows(), room.getColumns())))
-                .toList();
-    }
+    public void createRoom(String name, int rows, int columns) throws RoomAlreadyExistsException {
+        if (roomRepository.findByName(name).isPresent()) {
+            throw new RoomAlreadyExistsException();
+        }
 
-    @Override
-    public Optional<RoomDto> createRoom(String name, int rows, int columns) {
         Optional<Room> room = Optional.of(new Room(name, rows, columns));
 
         roomRepository.save(room.get());
-
-        return Optional.of(new RoomDto(name, rows, columns));
     }
 
     @Override
-    public Optional<RoomDto> getRoom(String name) {
+    public void updateRoom(String name, int rows, int columns) throws RoomDoesNotExistException {
         Optional<Room> room = roomRepository.findByName(name);
 
-        return room.map(room1 ->
-                new RoomDto(room1.getName(), room1.getRows(), room1.getColumns()));
-    }
-
-
-    @Override
-    public Optional<RoomDto> updateRoom(String name, int rows, int columns) {
-        Optional<Room> room = roomRepository.findByName(name);
+        if (room.isEmpty()) {
+            throw new RoomDoesNotExistException();
+        }
 
         room.ifPresent(room1 -> {
             room1.setName(name);
@@ -52,15 +41,30 @@ public class RoomServiceImpl implements RoomService {
             room1.setColumns(columns);
             roomRepository.save(room1);
         });
-
-        return room.map(room1 ->
-                new RoomDto(room1.getName(), room1.getRows(), room1.getColumns()));
     }
 
     @Override
-    public void deleteRoom(String name) {
+    public void deleteRoom(String name) throws RoomDoesNotExistException {
         Optional<Room> room = roomRepository.findByName(name);
 
-        room.ifPresent(roomRepository::delete);
+        if (room.isEmpty()) {
+            throw new RoomDoesNotExistException();
+        }
+
+        roomRepository.delete(room.get());
+    }
+
+    @Override
+    public List<Optional<RoomDto>> listRooms() throws RoomDoesNotExistException {
+        List<Room> rooms = roomRepository.findAll();
+
+        if (rooms.isEmpty()) {
+            throw new RoomDoesNotExistException();
+        }
+
+        return rooms.stream()
+                .map(room ->
+                        Optional.of(new RoomDto(room.getName(), room.getRows(), room.getColumns())))
+                .toList();
     }
 }
