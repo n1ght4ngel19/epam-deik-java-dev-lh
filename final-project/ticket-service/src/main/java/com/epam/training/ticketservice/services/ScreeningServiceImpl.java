@@ -80,7 +80,7 @@ public class ScreeningServiceImpl implements ScreeningService {
                 movieTitle, roomName, startDateTime);
 
         if (screening.isEmpty()) {
-            throw new ScreeningOverlapException("No screening to update");
+            throw new ScreeningDoesNotExistException();
         }
 
         screening.ifPresent(screening1 -> {

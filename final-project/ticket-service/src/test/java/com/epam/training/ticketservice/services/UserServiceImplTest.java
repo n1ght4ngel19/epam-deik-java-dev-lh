@@ -120,6 +120,21 @@ public class UserServiceImplTest {
     }
 
     @Test
+    public void testAdminSignInShouldThrowIllegalArgumentExceptionWhenCredentialsAreIncorrect()
+            throws IllegalArgumentException {
+        // Given
+        String username = "admin";
+        String password = "WrongPassword";
+        String role = "admin";
+
+        when(userRepository.findByUsernameAndPasswordAndRole(username, password, role))
+                .thenReturn(Optional.empty());
+
+        // When and Then
+        assertThrows(IllegalArgumentException.class, () -> underTest.adminSignIn(username, password));
+    }
+
+    @Test
     public void testDescribeShouldDescribeUserWhenUserIsSignedIn() {
         // Given
         String username = "User";
@@ -153,6 +168,78 @@ public class UserServiceImplTest {
     @Test
     public void testIsSignedInShouldReturnFalseWhenUserIsNotSignedIn() throws UserNotSignedInException {
         assertThrows(UserNotSignedInException.class, () -> underTest.describe());
+    }
+
+    @Test
+    public void testSignOutShouldThrowUserNotSignedInExceptionWhenUserIsNotSignedIn()
+            throws UserNotSignedInException {
+        assertThrows(UserNotSignedInException.class, () -> underTest.signOut());
+    }
+
+//    @Test
+//    public void testSignOutShouldSignOutUserWhenUserIsSignedIn() {
+//        // Given
+//        String username = "User";
+//        String password = "Password";
+//        String role = "user";
+//
+//        when(userRepository.findByUsername(username))
+//                .thenReturn(Optional.of(new User(username, password, role)));
+//        when(userRepository.findByUsernameAndPassword(username, password))
+//                .thenReturn(Optional.of(new User(username, password, role)));
+//
+//        // When
+//        underTest.signIn(username, password);
+//
+//        // Then
+//        assertTrue(underTest.describe().isPresent());
+//
+//        // When
+//        underTest.signOut();
+//
+//        // Then
+//        assertNull(underTest.);
+//    }
+
+    @Test
+    public void testDeleteUserShouldDeleteUserWhenUserExists() {
+        // Given
+        String username = "User";
+        String password = "Password";
+        String role = "user";
+
+        when(userRepository.findByUsername(username))
+                .thenReturn(Optional.of(new User(username, password, role)));
+        when(userRepository.findByUsernameAndPassword(username, password))
+                .thenReturn(Optional.of(new User(username, password, role)));
+
+        // When
+        underTest.deleteUser(username);
+
+        // Then
+        verify(userRepository, times(1)).delete(new User(username, password, role));
+    }
+
+    @Test
+    public void testDeleteUserShouldThrowUserNotFoundExceptionWhenUserDoesNotExist()
+            throws UserNotFoundException {
+        // Given
+        String username = "admin";
+        String password = "admin";
+        String role = "admin";
+
+        when(userRepository.findByUsername(username))
+                .thenReturn(Optional.of(new User(username, password, role)));
+        when(userRepository.findByUsernameAndPassword(username, password))
+                .thenReturn(Optional.of(new User(username, password, role)));
+
+        String username2 = "User";
+
+        when(userRepository.findByUsername(username2))
+                .thenReturn(Optional.empty());
+
+        // When and Then
+        assertThrows(UserNotFoundException.class, () -> underTest.deleteUser(username2));
     }
 
 }

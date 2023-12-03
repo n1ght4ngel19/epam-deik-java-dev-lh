@@ -2,6 +2,6 @@ package com.epam.training.ticketservice.exceptions;
 
 public class MovieDoesNotExistException extends RuntimeException {
     public MovieDoesNotExistException() {
-        super("Movie does not exist");
+        super("There are no movies at the moment");
     }
 }

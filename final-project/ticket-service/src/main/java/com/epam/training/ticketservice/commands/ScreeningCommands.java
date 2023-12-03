@@ -5,6 +5,7 @@ import com.epam.training.ticketservice.models.Screening;
 import com.epam.training.ticketservice.services.ScreeningService;
 import com.epam.training.ticketservice.services.UserService;
 import lombok.AllArgsConstructor;
+import lombok.Generated;
 import org.springframework.shell.Availability;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
@@ -68,6 +69,7 @@ public class ScreeningCommands {
         }
     }
 
+    @Generated
     private Availability isSignedInAsAdmin() {
         UserDto loggedInUser = userService.describe().orElse(null);
 

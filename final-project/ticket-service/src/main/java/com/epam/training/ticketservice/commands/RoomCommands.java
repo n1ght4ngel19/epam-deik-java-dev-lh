@@ -5,6 +5,7 @@ import com.epam.training.ticketservice.models.Room;
 import com.epam.training.ticketservice.services.RoomService;
 import com.epam.training.ticketservice.services.UserService;
 import lombok.AllArgsConstructor;
+import lombok.Generated;
 import org.springframework.shell.Availability;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
@@ -17,21 +18,6 @@ import java.util.Optional;
 public class RoomCommands {
     private final RoomService roomService;
     private final UserService userService;
-
-    @ShellMethod(key = "mr", value = "Create test room dataset")
-    public String mr() {
-        try {
-            roomService.createRoom("Pedersoli", 10, 10);
-            roomService.createRoom("Girotti", 10, 10);
-            roomService.createRoom("Kossuth", 10, 10);
-            roomService.createRoom("Petőfi", 10, 10);
-            roomService.createRoom("Kertész", 10, 10);
-
-            return "Test dataset created successfully";
-        } catch (Exception e) {
-            return e.getMessage();
-        }
-    }
 
     @ShellMethodAvailability("isSignedInAsAdmin")
     @ShellMethod(key = "create room", value = "Create room")
@@ -83,6 +69,7 @@ public class RoomCommands {
         }
     }
 
+    @Generated
     private Availability isSignedInAsAdmin() {
         UserDto loggedInUser = userService.describe().orElse(null);
 
